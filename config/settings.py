@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "rest_framework",
     "cars.apps.CarsConfig",
 ]
 
@@ -88,10 +89,23 @@ if DATABASE_URL:
         "default": dj_database_url.config(
             default=DATABASE_URL,
             conn_max_age=600,
-            ssl_require=True,
+            ssl_require=os.environ.get("DATABASE_SSL_REQUIRE", "False").lower() in ("1", "true", "yes"),
         )
     }
+elif os.environ.get("POSTGRES_DB"):
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.environ["POSTGRES_DB"],
+            "USER": os.environ.get("POSTGRES_USER", ""),
+            "PASSWORD": os.environ.get("POSTGRES_PASSWORD", ""),
+            "HOST": os.environ.get("POSTGRES_HOST", "localhost"),
+            "PORT": os.environ.get("POSTGRES_PORT", "5432"),
+            "CONN_MAX_AGE": 600,
+        }
+    }
 else:
+    # Local-only fallback; configure DATABASE_URL or POSTGRES_* for the primary database.
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
@@ -119,7 +133,10 @@ STORAGES = {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
     },
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        "BACKEND": (
+            "django.contrib.staticfiles.storage.StaticFilesStorage"
+            if DEBUG else "whitenoise.storage.CompressedManifestStaticFilesStorage"
+        ),
     },
 }
 
@@ -133,6 +150,21 @@ LOGIN_REDIRECT_URL = "catalog"
 LOGOUT_REDIRECT_URL = "catalog"
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+REST_FRAMEWORK = {
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticatedOrReadOnly",
+    ],
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 20,
+}
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {"console": {"class": "logging.StreamHandler"}},
+    "loggers": {"cars": {"handlers": ["console"], "level": "INFO", "propagate": False}},
+}
 
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")

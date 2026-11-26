@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load cars_extras %}
+{% block title %}Аналитика — «Ласточка»{% endblock %}
+{% block content %}
+<main class="container cabinet" style="padding:2rem 0">
+  <h1 style="font-size:1.6rem;margin-bottom:1rem">Аналитика автосалона</h1>
+  <form method="get" class="row-item"><label>С даты <input type="date" name="from" value="{{ request.GET.from }}"></label><label>По дату <input type="date" name="to" value="{{ request.GET.to }}"></label><button class="btn btn-sm">Применить</button></form>
+  <section class="grid-2">
+    <div><h2>Автомобилей в наличии</h2><strong>{{ available_count }}</strong></div><div><h2>Продано</h2><strong>{{ sold_count }}</strong></div>
+    <div><h2>Выручка</h2><strong>{{ revenue|format_kzt }}</strong></div><div><h2>Средняя стоимость продажи</h2><strong>{{ average_sale|floatformat:0|format_kzt }}</strong></div>
+    <div><h2>Клиентов</h2><strong>{{ customers_count }}</strong></div><div><h2>Бронирований / тест-драйвов</h2><strong>{{ bookings_count }} / {{ drives_count }}</strong></div>
+  </section>
+  <section><h2>Популярные марки</h2>{% for row in popular_brands %}<div class="row-item"><span class="grow">{{ row.car__brand }}</span><strong>{{ row.count }}</strong></div>{% empty %}<p class="empty">Данных о продажах пока нет.</p>{% endfor %}</section>
+  <section><h2>Популярные модели</h2>{% for row in popular_models %}<div class="row-item"><span class="grow">{{ row.car__brand }} {{ row.car__model }}</span><strong>{{ row.count }}</strong></div>{% empty %}<p class="empty">Данных о продажах пока нет.</p>{% endfor %}</section>
+  <section><h2>Продажи по менеджерам</h2>{% for row in manager_sales %}<div class="row-item"><span class="grow">{{ row.manager__username }}</span><span>{{ row.count }} сделок</span><strong>{{ row.revenue|format_kzt }}</strong></div>{% empty %}<p class="empty">Данных нет.</p>{% endfor %}</section>
+  <section><h2>Продажи услуг</h2>{% for row in service_sales %}<div class="row-item"><span class="grow">{{ row.service__name }}</span><span>{{ row.count }} раз</span><strong>{{ row.revenue|format_kzt }}</strong></div>{% empty %}<p class="empty">Данных нет.</p>{% endfor %}</section>
+</main>
+{% endblock %}

@@ -36,6 +36,38 @@
         <label>Кузов</label>
         {{ filter_form.body }}
       </div>
+      <div class="field">
+        <label>Модель</label>
+        <input name="model" value="{{ request.GET.model }}" placeholder="Camry">
+      </div>
+      <div class="field">
+        <label>Статус</label>
+        <select name="status">
+          <option value="">Любой</option>
+          {% for value,label in filter_status_choices %}<option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="field">
+        <label>Тип двигателя</label>
+        <input name="fuel" value="{{ request.GET.fuel }}" placeholder="Бензин, дизель, электро">
+      </div>
+      <div class="field">
+        <label>Коробка передач</label>
+        <input name="transmission" value="{{ request.GET.transmission }}" placeholder="Автомат">
+      </div>
+      <div class="field">
+        <label>Пробег до, км</label>
+        <input type="number" min="0" name="mileage_max" value="{{ request.GET.mileage_max }}">
+      </div>
+      <div class="field">
+        <label>Сортировка</label>
+        <select name="sort">
+          <option value="newest">Новые поступления</option>
+          <option value="price_asc" {% if request.GET.sort == "price_asc" %}selected{% endif %}>Сначала дешевле</option>
+          <option value="price_desc" {% if request.GET.sort == "price_desc" %}selected{% endif %}>Сначала дороже</option>
+          <option value="year" {% if request.GET.sort == "year" %}selected{% endif %}>По году выпуска</option>
+        </select>
+      </div>
       <button type="submit" class="btn btn-block">Применить</button>
       <a href="{% url 'catalog' %}" class="btn btn-secondary btn-block" style="margin-top:0.5rem;text-align:center;">Сбросить</a>
     </form>

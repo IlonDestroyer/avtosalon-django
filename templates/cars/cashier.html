@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load cars_extras %}
+{% block title %}Касса — «Ласточка»{% endblock %}
+{% block content %}
+<main class="container cabinet" style="padding:2rem 0">
+  <h1 style="font-size:1.6rem;margin-bottom:1rem">Регистрация платежей</h1>
+  {% for sale in sales %}
+    <section>
+      <div class="row-item"><span class="grow">Сделка #{{ sale.pk }} · {{ sale.customer.profile.full_name|default:sale.customer.username }} · {{ sale.car.title }}</span><strong>{{ sale.total_kzt|format_kzt }}</strong></div>
+      <form method="post" action="{% url 'register_sale_payment' sale.pk %}" class="row-item">
+        {% csrf_token %}<label>Сумма, ₸ <input type="number" min="1" name="amount_kzt" required></label>
+        <label>Способ <select name="method">{% for value,label in payment_methods %}<option value="{{ value }}">{{ label }}</option>{% endfor %}</select></label>
+        <button class="btn btn-sm" type="submit">Зарегистрировать</button>
+      </form>
+    </section>
+  {% empty %}<p class="empty">Завершённых продаж нет.</p>{% endfor %}
+</main>
+{% endblock %}

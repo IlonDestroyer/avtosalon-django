@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Рабочее место менеджера — «Ласточка»{% endblock %}
+{% block content %}
+<main class="container cabinet" style="padding:2rem 0">
+  <div class="row-item"><h1 class="grow">Рабочее место менеджера</h1><a class="btn" href="{% url 'create_sale' %}">Новая продажа</a></div>
+  <section><h2>Сводка</h2><p>Новые клиенты сегодня: <strong>{{ new_clients }}</strong> · Автомобилей в наличии: <strong>{{ available_cars }}</strong></p></section>
+  <section><h2>Создать бронь для клиента</h2>
+    <form method="post" action="{% url 'create_customer_booking' %}" class="row-item">
+      {% csrf_token %}
+      <select class="form-control grow" name="customer" required><option value="">Клиент</option>{% for customer in booking_customers %}<option value="{{ customer.pk }}">{{ customer.profile.full_name|default:customer.username }}</option>{% endfor %}</select>
+      <select class="form-control grow" name="car" required><option value="">Автомобиль</option>{% for car in booking_cars %}<option value="{{ car.pk }}">{{ car.title }}</option>{% endfor %}</select>
+      <input class="form-control grow" name="comment" placeholder="Комментарий">
+      <button class="btn btn-sm" type="submit">Забронировать</button>
+    </form>
+  </section>
+  <section><h2>Заявки и бронирования</h2>
+    {% for item in bookings %}<div class="row-item"><span class="grow">{{ item.car.title }} — {{ item.user.username }}</span><span class="status">{{ item.get_status_display }}</span></div>
+    {% empty %}<p class="empty">Активных бронирований нет.</p>{% endfor %}
+  </section>
+  <section><h2>Тест-драйвы сегодня</h2>
+    {% for item in drives %}<div class="row-item"><span class="grow">{{ item.scheduled_at|date:"H:i" }} · {{ item.car.title }} · {{ item.user.username }}</span><span class="status">{{ item.get_status_display }}</span></div>
+    {% empty %}<p class="empty">На сегодня записей нет.</p>{% endfor %}
+  </section>
+  <section><h2>Новые клиенты</h2>
+    {% for customer in customers %}<div class="row-item"><span class="grow">{{ customer.profile.full_name|default:customer.username }}</span><span>{{ customer.email }}</span><span>{{ customer.profile.phone }}</span></div>
+    {% empty %}<p class="empty">Клиентов пока нет.</p>{% endfor %}
+  </section>
+  <section><h2>Сделки в работе</h2>
+    {% for sale in sales %}
+      <div class="row-item"><span class="grow">#{{ sale.id }} · {{ sale.car.title }} · {{ sale.customer.username }}</span><span class="status">{{ sale.get_status_display }}</span>
+        <form method="post" action="{% url 'update_sale_status' sale.pk %}">{% csrf_token %}<button class="btn btn-sm" name="status" value="completed">Завершить</button></form>
+        <form method="post" action="{% url 'update_sale_status' sale.pk %}">{% csrf_token %}<button class="btn btn-secondary btn-sm" name="status" value="cancelled">Отменить</button></form>
+      </div>
+    {% empty %}<p class="empty">Текущих сделок нет.</p>
+    {% endfor %}
+  </section>
+</main>
+{% endblock %}

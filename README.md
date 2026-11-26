@@ -1,6 +1,6 @@
 # Автоцентр «Ласточка» — Django
 
-Классический Django-проект: каталог, бронирование, тест-драйвы, личный кабинет, Django Admin.
+Адаптивная информационная система автосалона: каталог, клиентский кабинет, CRM, роли сотрудников, бронирования, тест-драйвы, продажи, платежи, поставки, отчёты и REST API.
 
 ## Локальный запуск
 
@@ -18,7 +18,16 @@ python manage.py runserver
 ```
 
 - Сайт: http://127.0.0.1:8000/
-- Админка: http://127.0.0.1:8000/admin/ (admin / admin после seed_cars)
+- Админка: http://127.0.0.1:8000/admin/ (создайте администратора через `python manage.py createsuperuser`)
+- REST API: http://127.0.0.1:8000/api/ — `cars/` (фильтры `search`, `brand`, `model`, `price_min`, `price_max`, `year`, `body`, `fuel`, `transmission`, `drivetrain`, `color`, `status`, `car_type`, `mileage_max`, `sort`), `bookings/`, `test-drives/`, `favorites/`, `sales/`. Каталог публичный; бронирования, избранное и тест-драйвы требуют авторизации и принадлежат только текущему клиенту.
+
+Локально SQLite используется только как fallback, если PostgreSQL не настроен. Для основной БД задайте `DATABASE_URL` (например, `postgresql://user:password@localhost:5432/lastocka`) либо `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_HOST` и `POSTGRES_PORT`. `DATABASE_SSL_REQUIRE=True` включает TLS для `DATABASE_URL`.
+
+Seed-команда добавляет демонстрационные автомобили, справочник марок/моделей, услуги и поставщика. Чтобы дополнительно создать администратора командой, задайте сильный `SEED_ADMIN_PASSWORD` перед запуском. Роли клиента/менеджера/кассира/администратора/руководителя назначаются в Django Admin в профиле пользователя; менеджерская панель доступна по `/manager/`, отчёты — `/reports/`.
+
+Для плановой обработки броней, срок которых истёк, запускайте `python manage.py expire_bookings` (например, ежедневно через планировщик задач).
+
+Целевые тесты: `python manage.py test cars`.
 
 ## Деплой на Render
 

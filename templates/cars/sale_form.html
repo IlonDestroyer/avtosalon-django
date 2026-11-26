@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load cars_extras %}
+{% block title %}Новая продажа — «Ласточка»{% endblock %}
+{% block content %}
+<main class="container" style="max-width:760px;padding:2rem 1.25rem">
+  <form method="post" class="sidebar-card">
+    {% csrf_token %}<h1 style="font-size:1.5rem;margin-bottom:1rem">Оформление сделки</h1>
+    <label class="field-label">Клиент</label><select class="form-control" name="customer" required>{% for customer in customers %}<option value="{{ customer.pk }}">{{ customer.profile.full_name|default:customer.username }} — {{ customer.email }}</option>{% endfor %}</select>
+    <label class="field-label">Автомобиль</label><select class="form-control" name="car" required>{% for car in cars %}<option value="{{ car.pk }}">{{ car.title }} — {{ car.price_kzt|format_kzt }}</option>{% endfor %}</select>
+    <label class="field-label">Дополнительные услуги</label><select class="form-control" name="services" multiple>{% for service in services %}<option value="{{ service.pk }}">{{ service.name }} — {{ service.price_kzt|format_kzt }}</option>{% endfor %}</select>
+    <label class="field-label">Скидка, ₸</label><input class="form-control" type="number" min="0" name="discount_kzt" value="0">
+    <label class="field-label">Способ оплаты</label><select class="form-control" name="payment_method">{% for value,label in payment_methods %}<option value="{{ value }}">{{ label }}</option>{% endfor %}</select>
+    <label class="field-label">Комментарий</label><textarea class="form-control" name="notes"></textarea>
+    <label><input type="checkbox" name="complete"> Завершить продажу сразу</label>
+    <button class="btn btn-block" style="margin-top:1rem" type="submit">Сохранить сделку</button>
+  </form>
+</main>
+{% endblock %}

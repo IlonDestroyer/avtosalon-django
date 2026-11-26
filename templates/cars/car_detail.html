@@ -11,6 +11,11 @@
     {% else %}
       <div class="detail-img" style="display:flex;align-items:center;justify-content:center;color:var(--muted);">Нет фото</div>
     {% endif %}
+    {% if car_images %}
+      <div class="car-grid" style="grid-template-columns:repeat(auto-fit,minmax(120px,1fr));margin-top:.75rem">
+        {% for image in car_images %}<img class="detail-img" style="aspect-ratio:4/3" src="{{ image.image.url }}" alt="{{ image.caption|default:car.title }}">{% endfor %}
+      </div>
+    {% endif %}
 
     <div class="card" style="margin-top:1rem;">
       <div class="card-body">
@@ -21,11 +26,16 @@
           <p class="muted" style="margin-bottom:0.75rem;">{{ car.description }}</p>
         {% endif %}
         <dl class="specs">
+          {% if car.vin %}<div class="spec"><dt>VIN</dt><dd>{{ car.vin }}</dd></div>{% endif %}
+          {% if car.stock_number %}<div class="spec"><dt>Артикул</dt><dd>{{ car.stock_number }}</dd></div>{% endif %}
           <div class="spec"><dt>Год выпуска</dt><dd>{{ car.year }}</dd></div>
           <div class="spec"><dt>Кузов</dt><dd>{{ car.body }}</dd></div>
           <div class="spec"><dt>Пробег</dt><dd>{{ car.mileage_km|format_number }} км</dd></div>
-          <div class="spec"><dt>Двигатель</dt><dd>{{ car.fuel }}, {{ car.horsepower }} л.с.</dd></div>
+          <div class="spec"><dt>Двигатель</dt><dd>{{ car.engine_type|default:car.fuel }}{% if car.engine_volume %}, {{ car.engine_volume }} л{% endif %}, {{ car.horsepower }} л.с.</dd></div>
           <div class="spec"><dt>Коробка</dt><dd>{{ car.transmission }}</dd></div>
+          {% if car.drivetrain %}<div class="spec"><dt>Привод</dt><dd>{{ car.drivetrain }}</dd></div>{% endif %}
+          {% if car.color %}<div class="spec"><dt>Цвет</dt><dd>{{ car.color }}</dd></div>{% endif %}
+          <div class="spec"><dt>Состояние</dt><dd>{{ car.get_car_type_display }}</dd></div>
         </dl>
       </div>
     </div>
@@ -35,6 +45,12 @@
     <div class="sidebar-card">
       <div class="muted" style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;">Стоимость</div>
       <div class="price-lg">{{ car.price_kzt|format_kzt }}</div>
+      {% if user.is_authenticated %}
+      <form method="post" action="{% url 'toggle_favorite' car.slug %}" style="margin:.75rem 0;">
+        {% csrf_token %}
+        <button class="btn btn-secondary btn-block" type="submit">{% if is_favorite %}Убрать из избранного{% else %}Добавить в избранное{% endif %}</button>
+      </form>
+      {% endif %}
       <p class="muted" style="margin:0.5rem 0 1rem;">Бронь на 3 дня, предоплата 500 000 ₸ входит в стоимость покупки.</p>
 
       {% if user.is_authenticated %}

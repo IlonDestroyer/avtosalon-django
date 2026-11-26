@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth.models import User
 
-from .models import Booking, Profile, TestDrive
+from .models import Booking, Car, Profile, TestDrive
 
 
 class RegisterForm(UserCreationForm):
@@ -76,17 +76,29 @@ class PaymentForm(forms.Form):
     )
 
 
+class ProfileUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ("full_name", "phone", "address", "iin")
+        widgets = {
+            "full_name": forms.TextInput(attrs={"class": "form-control"}),
+            "phone": forms.TextInput(attrs={"class": "form-control"}),
+            "address": forms.TextInput(attrs={"class": "form-control"}),
+            "iin": forms.TextInput(attrs={"class": "form-control", "inputmode": "numeric", "maxlength": "12"}),
+        }
+
+
 class CarFilterForm(forms.Form):
     search = forms.CharField(
         required=False,
         label="Поиск",
-        widget=forms.TextInput(attrs={"placeholder": "BMW X5, 2023, седан"}),
+        widget=forms.TextInput(attrs={"placeholder": "BMW X5, VIN, 2023"}),
     )
     brand = forms.ChoiceField(required=False, label="Марка")
     body = forms.ChoiceField(
         required=False,
         label="Кузов",
-        choices=[("", "Все"), ("Седан", "Седан"), ("Кроссовер", "Кроссовер")],
+        choices=[("", "Все"), *Car.BODY_CHOICES],
     )
     year = forms.ChoiceField(required=False, label="Год")
     price_from = forms.IntegerField(

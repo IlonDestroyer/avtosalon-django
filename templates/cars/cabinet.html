@@ -15,6 +15,24 @@
   </section>
 
   <section>
+    <h2>Профиль</h2>
+    <form method="post" class="grid-2">
+      {% csrf_token %}
+      {% for field in profile_form %}
+        <div class="field"><label>{{ field.label }}</label>{{ field }}{{ field.errors }}</div>
+      {% endfor %}
+      <button class="btn" type="submit">Сохранить профиль</button>
+    </form>
+  </section>
+
+  <section>
+    <h2>Избранное</h2>
+    {% for favorite in favorites %}
+      <div class="row-item"><a class="grow" href="{% url 'car_detail' favorite.car.slug %}">{{ favorite.car.title }}</a><span>{{ favorite.car.price_kzt|format_kzt }}</span></div>
+    {% empty %}<p class="empty">Сохранённых автомобилей пока нет.</p>{% endfor %}
+  </section>
+
+  <section>
     <h2>Брони</h2>
     {% if bookings %}
       {% for b in bookings %}
@@ -32,6 +50,13 @@
     {% else %}
       <p class="empty">Броней пока нет. <a href="{% url 'catalog' %}">Выбрать автомобиль</a></p>
     {% endif %}
+  </section>
+
+  <section>
+    <h2>История покупок</h2>
+    {% for sale in sales %}
+      <div class="row-item"><span class="grow">{{ sale.car.title }} · {{ sale.completed_at|date:"d.m.Y" }}</span><strong>{{ sale.total_kzt|format_kzt }}</strong></div>
+    {% empty %}<p class="empty">Покупок пока нет.</p>{% endfor %}
   </section>
 
   <section>

@@ -1,7 +1,9 @@
 from django.core.management.base import BaseCommand
+import os
+
 from django.contrib.auth.models import User
 
-from cars.models import Car, Profile
+from cars.models import Brand, Car, CarModel, Profile, Service, Supplier
 
 
 SAMPLE = [
@@ -96,19 +98,39 @@ class Command(BaseCommand):
     help = "Заполняет каталог демо-автомобилями и создаёт суперпользователя admin/admin"
 
     def handle(self, *args, **options):
-        if not User.objects.filter(username="admin").exists():
-            user = User.objects.create_superuser("admin", "admin@lastocka.kz", "admin")
+        admin_password = os.environ.get("SEED_ADMIN_PASSWORD")
+        if admin_password and not User.objects.filter(username="admin").exists():
+            user = User.objects.create_superuser("admin", "admin@lastocka.kz", admin_password)
             Profile.objects.update_or_create(
                 user=user,
-                defaults={"full_name": "Администратор", "phone": "+77000000000"},
+                defaults={"full_name": "Администратор", "phone": "+77000000000", "role": Profile.ROLE_ADMIN},
             )
-            self.stdout.write(self.style.SUCCESS("Создан суперпользователь admin / admin"))
-        else:
-            self.stdout.write("Суперпользователь admin уже существует")
+            self.stdout.write(self.style.SUCCESS("Создан superuser admin (пароль задан через SEED_ADMIN_PASSWORD)"))
+        elif not admin_password:
+            self.stdout.write("Суперпользователь не создавался; задайте SEED_ADMIN_PASSWORD и повторите команду.")
+
+        supplier, _ = Supplier.objects.get_or_create(
+            name="Демо-поставщик",
+            defaults={"bin": "000000000000", "contact_name": "Отдел поставок", "phone": "+77000000000"},
+        )
+        for name, price in (
+            ("Страхование", 300_000), ("Дополнительное оборудование", 500_000),
+            ("Сигнализация", 180_000), ("Комплект шин", 250_000),
+            ("Регистрация автомобиля", 75_000), ("Доставка", 100_000),
+        ):
+            Service.objects.get_or_create(name=name, defaults={"price_kzt": price})
 
         created = 0
         for item in SAMPLE:
             if not Car.objects.filter(brand=item["brand"], model=item["model"], trim=item["trim"]).exists():
-                Car.objects.create(**item)
+                brand, _ = Brand.objects.get_or_create(name=item["brand"])
+                model, _ = CarModel.objects.get_or_create(brand=brand, name=item["model"])
+                Car.objects.create(
+                    **item,
+                    brand_catalog=brand,
+                    model_catalog=model,
+                    supplier=supplier,
+                    car_type=Car.TYPE_NEW if item["mileage_km"] == 0 else Car.TYPE_USED,
+                )
                 created += 1
         self.stdout.write(self.style.SUCCESS(f"Добавлено автомобилей: {created}"))
