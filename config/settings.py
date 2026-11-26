@@ -10,31 +10,34 @@ SECRET_KEY = os.environ.get(
 
 DEBUG = os.environ.get("DEBUG", "True").lower() in ("1", "true", "yes")
 
+
 ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
-    "qwertyuiop-blue-seven.vercel.app",
+    ".vercel.app",
 ]
 
-# Дополнительные домены из переменных окружения
+# Домены из переменных окружения
 ALLOWED_HOSTS += [
     host.strip()
     for host in os.environ.get("ALLOWED_HOSTS", "").split(",")
     if host.strip()
 ]
 
-# Автоматическое добавление домена Vercel
+# Автоматическое определение домена Vercel
 VERCEL_URL = os.environ.get("VERCEL_URL")
 
 if VERCEL_URL:
     ALLOWED_HOSTS.append(VERCEL_URL)
 
+# Поддержка Render
+RENDER_EXTERNAL_HOSTNAME = os.environ.get(
+    "RENDER_EXTERNAL_HOSTNAME"
+)
 
-# Можно добавить свои домены через переменную окружения
-for origin in os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(","):
-    origin = origin.strip()
-    if origin:
-        CSRF_TRUSTED_ORIGINS.append(origin)
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+
 
 INSTALLED_APPS = [
     "django.contrib.admin",
