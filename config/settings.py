@@ -11,15 +11,23 @@ SECRET_KEY = os.environ.get(
 DEBUG = os.environ.get("DEBUG", "True").lower() in ("1", "true", "yes")
 
 ALLOWED_HOSTS = [
-    h.strip()
-    for h in os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
-    if h.strip()
+    "localhost",
+    "127.0.0.1",
+    "qwertyuiop-blue-seven.vercel.app",
 ]
 
-# Render добавляет свой хост автоматически
-RENDER_EXTERNAL_HOSTNAME = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
-if RENDER_EXTERNAL_HOSTNAME:
-    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+# Дополнительные домены из переменных окружения
+ALLOWED_HOSTS += [
+    host.strip()
+    for host in os.environ.get("ALLOWED_HOSTS", "").split(",")
+    if host.strip()
+]
+
+# Автоматическое добавление домена Vercel
+VERCEL_URL = os.environ.get("VERCEL_URL")
+
+if VERCEL_URL:
+    ALLOWED_HOSTS.append(VERCEL_URL)
 
 CSRF_TRUSTED_ORIGINS = []
 if RENDER_EXTERNAL_HOSTNAME:
