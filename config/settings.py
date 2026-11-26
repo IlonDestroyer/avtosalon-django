@@ -29,9 +29,7 @@ VERCEL_URL = os.environ.get("VERCEL_URL")
 if VERCEL_URL:
     ALLOWED_HOSTS.append(VERCEL_URL)
 
-CSRF_TRUSTED_ORIGINS = []
-if RENDER_EXTERNAL_HOSTNAME:
-    CSRF_TRUSTED_ORIGINS.append(f"https://{RENDER_EXTERNAL_HOSTNAME}")
+
 # Можно добавить свои домены через переменную окружения
 for origin in os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(","):
     origin = origin.strip()
